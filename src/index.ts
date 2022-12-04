@@ -24,18 +24,32 @@ const createWindow = async () => {
     },
   });
 
+  const startLoading = () => {
+    mainWindow.setTitle('Loading and parsing spreadsheet');
+    mainWindow.setProgressBar(2, { mode: 'indeterminate' });
+    mainWindow.setOpacity(0.8);
+    mainWindow.setIgnoreMouseEvents(true);
+  };
+
+  const endLoading = () => {
+    mainWindow.setTitle('GaymDesigner Parser');
+    mainWindow.setProgressBar(-1);
+    mainWindow.setOpacity(1);
+    mainWindow.setIgnoreMouseEvents(false);
+  };
+
   ipcMain.handle('parseAutomatic', async (event, ...args: string[]) => {
-    console.log(args);
-
-    const [spreadsheetLink, apiKey, sheetName] = args;
-
-    let spreadsheetId = spreadsheetLink.split('spreadsheets/d/')[1];
-
-    if (spreadsheetId.includes('/')) {
-      spreadsheetId = spreadsheetId.split('/')[0];
-    }
-
     try {
+      startLoading();
+
+      const [spreadsheetLink, apiKey, sheetName] = args;
+
+      let spreadsheetId = spreadsheetLink.split('spreadsheets/d/')[1];
+
+      if (spreadsheetId.includes('/')) {
+        spreadsheetId = spreadsheetId.split('/')[0];
+      }
+
       const parser = new CreaturesParser(spreadsheetId, apiKey);
 
       await parser.loadSpreadsheet(sheetName);
@@ -45,7 +59,16 @@ const createWindow = async () => {
       const file = await dialog.showSaveDialog({
         title: 'Select path to save file',
         buttonLabel: 'Save',
+        defaultPath: path.join(__dirname, 'creatures.xml'),
+        filters: [
+          {
+            name: 'XML Files',
+            extensions: ['xml'],
+          },
+        ],
       });
+
+      endLoading();
 
       if (file.canceled) return;
 
@@ -61,22 +84,22 @@ const createWindow = async () => {
   });
 
   ipcMain.handle('parseManual', async (event, ...args: string[]) => {
-    console.log(args);
-
-    const [spreadsheetLink, apiKey, sheetName, rowsToParse] = args;
-
-    let spreadsheetId = spreadsheetLink.split('spreadsheets/d/')[1];
-
-    if (spreadsheetId.includes('/')) {
-      spreadsheetId = spreadsheetId.split('/')[0];
-    }
-
     try {
+      startLoading();
+
+      const [spreadsheetLink, apiKey, sheetName, rowsToParse] = args;
+
+      let spreadsheetId = spreadsheetLink.split('spreadsheets/d/')[1];
+
+      if (spreadsheetId.includes('/')) {
+        spreadsheetId = spreadsheetId.split('/')[0];
+      }
+
       const parser = new CreaturesParser(spreadsheetId, apiKey);
 
       await parser.loadSpreadsheet(sheetName);
 
-      const rowsToPick = rowsToParse.split(',').map((row) => parseInt(row));
+      const rowsToPick = rowsToParse.split('-').map((row) => parseInt(row));
 
       const xml = parser.manualParse(rowsToPick);
 
@@ -91,6 +114,8 @@ const createWindow = async () => {
           },
         ],
       });
+
+      endLoading();
 
       if (file.canceled) return;
 
@@ -109,7 +134,7 @@ const createWindow = async () => {
   await mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
   // Open the DevTools.
-  mainWindow.webContents.openDevTools();
+  // mainWindow.webContents.openDevTools();
 };
 
 // This method will be called when Electron has finished

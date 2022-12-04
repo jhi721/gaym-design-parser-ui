@@ -34,9 +34,9 @@ export class CreaturesParser {
     }
   }
 
-  public manualParse(rowsToPick: number[]) {
+  public manualParse([start, end]: number[]) {
     const creatures: string[][] = this._rows
-      .filter(({ rowIndex }) => rowsToPick.includes(rowIndex))
+      .filter(({ rowIndex }) => rowIndex >= start && rowIndex <= end)
       .map(({ _rawData }) => _rawData);
 
     return createXml(creatures);

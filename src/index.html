@@ -13,6 +13,7 @@
           placeholder="Enter API Key here"
           id="api-key"
           type="text"
+          value="AIzaSyAAC7-k0yuhyBAreb9HJyXGYzO6gkYBWUA"
           required
         />
       </label>
@@ -24,6 +25,7 @@
           placeholder="Paste link here"
           id="spreadsheet-link"
           type="text"
+          value="https://docs.google.com/spreadsheets/d/1LjwvTLnkYOJ6ls2aRcErc-k6WlD2YXkrxlLaIP81kLI/edit#gid=1196638233"
           required
         />
       </label>
@@ -58,7 +60,7 @@
           class="form-control w-100 mb-2 mt-1"
           id="custom-rows-text"
           type="text"
-          placeholder="Type rows like 228,322,1488"
+          placeholder="Type rows like 228-322"
         />
       </label>
 
@@ -72,68 +74,75 @@
     </form>
 
     <script>
-      let spreadSheetLink = '';
-      let sheetTitle = '';
-      let apiKey = '';
-      let customRows = '';
+      try {
+        let spreadSheetLink = '';
+        let sheetTitle = '';
+        let apiKey = '';
+        let customRows = '';
 
-      const parseForm = document.getElementById('parse-form');
+        const parseForm = document.getElementById('parse-form');
 
-      const parseBtn = document.getElementById('parse-btn');
-      const spreadSheetLinkInput = document.getElementById('spreadsheet-link');
-      const sheetTitleInput = document.getElementById('sheet-title');
+        const parseBtn = document.getElementById('parse-btn');
+        const spreadSheetLinkInput =
+          document.getElementById('spreadsheet-link');
+        const sheetTitleInput = document.getElementById('sheet-title');
 
-      const apiKeyInput = document.getElementById('api-key');
+        const apiKeyInput = document.getElementById('api-key');
 
-      const customRowsCheckbox = document.getElementById(
-        'custom-rows-checkbox',
-      );
+        const customRowsCheckbox = document.getElementById(
+          'custom-rows-checkbox',
+        );
 
-      const customRowsLabel = document.getElementById('custom-rows-text-label');
-      const customRowsInput = document.getElementById('custom-rows-text');
-      customRowsLabel.style.display = 'none';
+        const customRowsLabel = document.getElementById(
+          'custom-rows-text-label',
+        );
+        const customRowsInput = document.getElementById('custom-rows-text');
+        customRowsLabel.style.display = 'none';
 
-      parseBtn.disabled = true;
+        parseBtn.disabled = true;
 
-      apiKeyInput.addEventListener('input', (event) => {
-        const { value } = event.target;
+        apiKeyInput.addEventListener('input', (event) => {
+          const { value } = event.target;
 
-        parseBtn.disabled = !value && spreadSheetLink;
-        apiKey = value;
-      });
+          parseBtn.disabled = !value && spreadSheetLink;
+          apiKey = value;
+        });
 
-      sheetTitleInput.addEventListener('input', (event) => {
-        sheetTitle = event.target.value;
-      });
+        sheetTitleInput.addEventListener('input', (event) => {
+          sheetTitle = event.target.value;
+        });
 
-      customRowsInput.addEventListener('input', (event) => {
-        customRows = event.target.value;
-      });
+        customRowsInput.addEventListener('input', (event) => {
+          customRows = event.target.value;
+        });
 
-      spreadSheetLinkInput.addEventListener('input', (event) => {
-        const { value } = event.target;
+        spreadSheetLinkInput.addEventListener('input', (event) => {
+          const { value } = event.target;
 
-        parseBtn.disabled = !value && apiKey;
-        spreadSheetLink = value;
-      });
+          parseBtn.disabled = !value && apiKey;
+          spreadSheetLink = value;
+        });
 
-      customRowsCheckbox.addEventListener('change', () => {
-        customRowsLabel.style.display = customRowsCheckbox.checked
-          ? 'initial'
-          : 'none';
-      });
+        customRowsCheckbox.addEventListener('change', () => {
+          customRowsLabel.style.display = customRowsCheckbox.checked
+            ? 'initial'
+            : 'none';
+        });
 
-      parseForm.addEventListener('submit', (event) => {
-        event.preventDefault();
+        parseForm.addEventListener('submit', (event) => {
+          event.preventDefault();
 
-        if (customRowsCheckbox.checked && customRowsInput.value) {
-          parse.manual(spreadSheetLink, apiKey, sheetTitle, customRows);
+          if (customRowsCheckbox.checked && customRowsInput.value) {
+            parse.manual(spreadSheetLink, apiKey, sheetTitle, customRows);
 
-          return;
-        }
+            return;
+          }
 
-        parse.automatic(spreadSheetLink, apiKey, sheetTitle);
-      });
+          parse.automatic(spreadSheetLink, apiKey, sheetTitle);
+        });
+      } catch (e) {
+        alert('Something went wrong on client side');
+      }
     </script>
   </body>
 </html>
