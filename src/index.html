@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>GaymDesigner Parser</title>
+  </head>
+  <body class="container d-flex align-items-center w-100 vh-100">
+    <form class="w-100" id="parse-form">
+      <label class="form-label w-100" for="api-key">
+        API Key
+        <input
+          class="form-control w-100"
+          placeholder="Enter API Key here"
+          id="api-key"
+          type="text"
+          required
+        />
+      </label>
+
+      <label class="form-label w-100" for="spreadsheet-link">
+        Link to spreadsheet
+        <input
+          class="form-control w-100"
+          placeholder="Paste link here"
+          id="spreadsheet-link"
+          type="text"
+          required
+        />
+      </label>
+
+      <label class="form-label w-100" for="sheet-title">
+        Sheet title
+        <input
+          class="form-control w-100"
+          placeholder="Optional field"
+          id="sheet-title"
+          type="text"
+        />
+      </label>
+
+      <div class="form-check">
+        <input
+          class="form-check-input"
+          id="custom-rows-checkbox"
+          type="checkbox"
+        />
+        <label class="form-check-label" for="custom-rows-checkbox"
+          >Manually select rows</label
+        >
+      </div>
+
+      <label
+        class="form-label w-100"
+        for="custom-rows-text"
+        id="custom-rows-text-label"
+      >
+        <input
+          class="form-control w-100 mb-2 mt-1"
+          id="custom-rows-text"
+          type="text"
+          placeholder="Type rows like 228,322,1488"
+        />
+      </label>
+
+      <button
+        class="btn btn-success w-100 form-control"
+        id="parse-btn"
+        type="submit"
+      >
+        Parse
+      </button>
+    </form>
+
+    <script>
+      let spreadSheetLink = '';
+      let sheetTitle = '';
+      let apiKey = '';
+      let customRows = '';
+
+      const parseForm = document.getElementById('parse-form');
+
+      const parseBtn = document.getElementById('parse-btn');
+      const spreadSheetLinkInput = document.getElementById('spreadsheet-link');
+      const sheetTitleInput = document.getElementById('sheet-title');
+
+      const apiKeyInput = document.getElementById('api-key');
+
+      const customRowsCheckbox = document.getElementById(
+        'custom-rows-checkbox',
+      );
+
+      const customRowsLabel = document.getElementById('custom-rows-text-label');
+      const customRowsInput = document.getElementById('custom-rows-text');
+      customRowsLabel.style.display = 'none';
+
+      parseBtn.disabled = true;
+
+      apiKeyInput.addEventListener('input', (event) => {
+        const { value } = event.target;
+
+        parseBtn.disabled = !value && spreadSheetLink;
+        apiKey = value;
+      });
+
+      sheetTitleInput.addEventListener('input', (event) => {
+        sheetTitle = event.target.value;
+      });
+
+      customRowsInput.addEventListener('input', (event) => {
+        customRows = event.target.value;
+      });
+
+      spreadSheetLinkInput.addEventListener('input', (event) => {
+        const { value } = event.target;
+
+        parseBtn.disabled = !value && apiKey;
+        spreadSheetLink = value;
+      });
+
+      customRowsCheckbox.addEventListener('change', () => {
+        customRowsLabel.style.display = customRowsCheckbox.checked
+          ? 'initial'
+          : 'none';
+      });
+
+      parseForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+
+        if (customRowsCheckbox.checked && customRowsInput.value) {
+          parse.manual(spreadSheetLink, apiKey, sheetTitle, customRows);
+
+          return;
+        }
+
+        parse.automatic(spreadSheetLink, apiKey, sheetTitle);
+      });
+    </script>
+  </body>
+</html>
