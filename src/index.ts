@@ -38,46 +38,60 @@ const createWindow = async () => {
     mainWindow.setIgnoreMouseEvents(false);
   };
 
+  const parseInputData = async (
+    spreadsheetLink: string,
+    apiKey: string,
+    sheetName?: string,
+  ) => {
+    let spreadsheetId = spreadsheetLink.split('spreadsheets/d/')[1];
+
+    if (spreadsheetId.includes('/')) {
+      spreadsheetId = spreadsheetId.split('/')[0];
+    }
+
+    const parser = new CreaturesParser(spreadsheetId, apiKey);
+
+    await parser.loadSpreadsheet(sheetName);
+
+    return parser;
+  };
+
+  const saveFile = async (xml: string) => {
+    const file = await dialog.showSaveDialog({
+      title: 'Select path to save file',
+      buttonLabel: 'Save',
+      defaultPath: path.join(__dirname, 'creatures.xml'),
+      filters: [
+        {
+          name: 'XML Files',
+          extensions: ['xml'],
+        },
+      ],
+    });
+
+    endLoading();
+
+    if (file.canceled) return;
+
+    await fs.writeFile(file.filePath.toString(), xml);
+
+    await dialog.showMessageBox({
+      title: 'Success',
+      message: 'File was saved successfully',
+    });
+  };
+
   ipcMain.handle('parseAutomatic', async (event, ...args: string[]) => {
     try {
       startLoading();
 
       const [spreadsheetLink, apiKey, sheetName] = args;
 
-      let spreadsheetId = spreadsheetLink.split('spreadsheets/d/')[1];
-
-      if (spreadsheetId.includes('/')) {
-        spreadsheetId = spreadsheetId.split('/')[0];
-      }
-
-      const parser = new CreaturesParser(spreadsheetId, apiKey);
-
-      await parser.loadSpreadsheet(sheetName);
+      const parser = await parseInputData(spreadsheetLink, apiKey, sheetName);
 
       const xml = parser.autoParse();
 
-      const file = await dialog.showSaveDialog({
-        title: 'Select path to save file',
-        buttonLabel: 'Save',
-        defaultPath: path.join(__dirname, 'creatures.xml'),
-        filters: [
-          {
-            name: 'XML Files',
-            extensions: ['xml'],
-          },
-        ],
-      });
-
-      endLoading();
-
-      if (file.canceled) return;
-
-      await fs.writeFile(file.filePath.toString(), xml);
-
-      await dialog.showMessageBox({
-        title: 'Success',
-        message: 'File was saved successfully',
-      });
+      await saveFile(xml);
     } catch (e) {
       await dialog.showErrorBox('Something went wrong', e.message);
     }
@@ -89,42 +103,13 @@ const createWindow = async () => {
 
       const [spreadsheetLink, apiKey, sheetName, rowsToParse] = args;
 
-      let spreadsheetId = spreadsheetLink.split('spreadsheets/d/')[1];
-
-      if (spreadsheetId.includes('/')) {
-        spreadsheetId = spreadsheetId.split('/')[0];
-      }
-
-      const parser = new CreaturesParser(spreadsheetId, apiKey);
-
-      await parser.loadSpreadsheet(sheetName);
+      const parser = await parseInputData(spreadsheetLink, apiKey, sheetName);
 
       const rowsToPick = rowsToParse.split('-').map((row) => parseInt(row));
 
       const xml = parser.manualParse(rowsToPick);
 
-      const file = await dialog.showSaveDialog({
-        title: 'Select path to save file',
-        buttonLabel: 'Save',
-        defaultPath: path.join(__dirname, 'creatures.xml'),
-        filters: [
-          {
-            name: 'XML Files',
-            extensions: ['xml'],
-          },
-        ],
-      });
-
-      endLoading();
-
-      if (file.canceled) return;
-
-      await fs.writeFile(file.filePath.toString(), xml);
-
-      await dialog.showMessageBox({
-        title: 'Success',
-        message: 'File was saved successfully',
-      });
+      await saveFile(xml);
     } catch (e) {
       await dialog.showErrorBox('Something went wrong', e.message);
     }
